@@ -15,12 +15,15 @@ function App() {
   return (
     <>
       <div className="content-wrapper">
-        <h2>本机校园网状态</h2>
+        <h2 className="network-status-title">
+          本机校园网状态
+        </h2>
         <div className="table-container">
           <NetworkTable data={data} />
           <ActionButtons data={data} />
         </div>
       </div>
+
       <Footer />
       <SakanaWidget />
     </>
