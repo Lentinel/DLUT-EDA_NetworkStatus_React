@@ -14,28 +14,10 @@ function App() {
 
   return (
     <>
-      <div
-        className="content-wrapper"
-        style={{
-          paddingTop: '18px',
-        }}
-      >
-        <h2
-          style={{
-            fontWeight: 600,
-            color: '#1f1f1f',
-
-            textShadow: `
-              -1px -1px 0 #fff,
-               1px -1px 0 #fff,
-              -1px  1px 0 #fff,
-               1px  1px 0 #fff
-            `,
-          }}
-        >
+      <div className="content-wrapper">
+        <h2 className="network-status-title">
           本机校园网状态
         </h2>
-
         <div className="table-container">
           <NetworkTable data={data} />
           <ActionButtons data={data} />
