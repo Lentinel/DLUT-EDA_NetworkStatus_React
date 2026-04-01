@@ -42,13 +42,13 @@ export function useBackgroundRotation() {
       setCurrentBackground(src);
     };
 
-    // 先绑定事件，再设置 src，避免缓存图片错过 onload 事件
+    // 优先使用 decode 在设置 src 后解码图片；不支持时回退到 onload/onerror
     if (img.decode) {
+      img.src = src;
       img
         .decode()
         .then(applyBackground)
         .catch(applyBackground);
-      img.src = src;
     } else {
       // 检查图片是否已缓存完成
       img.onload = applyBackground;

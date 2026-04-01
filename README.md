@@ -33,6 +33,8 @@ npm run preview
 
 支持的图片格式：JPG, JPEG, PNG, WEBP, GIF, BMP
 
+> **注意**：背景图会在每次刷新页面时随机更换，目前不支持定时自动轮播。
+
 > 注意：`public/background/ReadMe.txt` 会被自动忽略，可以在此放置说明文件。
 
 ## 功能特性
