@@ -1,19 +1,18 @@
 import { readFileSync, writeFileSync, readdirSync } from 'fs';
-import { join, relative } from 'path';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// 背景图目录路径
-const BACKGROUND_DIR = join(__dirname);
+// 背景图目录路径（相对于 scripts 目录）
+const BACKGROUND_DIR = join(__dirname, '../public/background');
 
 // 支持的图片格式
 const SUPPORTED_FORMATS = ['.jpg', '.jpeg', '.png', '.webp', '.gif', '.bmp'];
 
-// 目标文件路径（相对于当前脚本位置）
-const TARGET_FILE = join(__dirname, '../../src/hooks/useBackgroundRotation.jsx');
+// 目标文件路径（相对于 scripts 目录）
+const TARGET_FILE = join(__dirname, '../src/hooks/useBackgroundRotation.jsx');
 
 // 获取背景图目录中的所有图片文件
 function getBackgroundImages() {
@@ -21,7 +20,7 @@ function getBackgroundImages() {
   return files
     .filter(file => {
       const ext = file.toLowerCase().slice(file.lastIndexOf('.'));
-      return SUPPORTED_FORMATS.includes(ext) && file !== 'update-backgrounds.js';
+      return SUPPORTED_FORMATS.includes(ext) && file !== 'ReadMe.txt';
     })
     .sort() // 按文件名排序
     .map(file => `/background/${file}`);
@@ -36,13 +35,26 @@ function generateArrayContent(images) {
 function updateHookFile(images) {
   const content = readFileSync(TARGET_FILE, 'utf-8');
   
+  const regex = /const BACKGROUND_IMAGES = \[[\s\S]*?\];/;
+  if (!regex.test(content)) {
+    console.error('✗ 未能更新 useBackgroundRotation.jsx：未找到 BACKGROUND_IMAGES 定义');
+    process.exitCode = 1;
+    return;
+  }
+  
   const newContent = content.replace(
-    /const BACKGROUND_IMAGES = \[[\s\S]*?\];/,
+    regex,
     `const BACKGROUND_IMAGES = [\n${generateArrayContent(images)}\n];`
   );
 
+  if (newContent === content) {
+    console.error('✗ 未能更新 useBackgroundRotation.jsx：文件格式可能已变更');
+    process.exitCode = 1;
+    return;
+  }
+
   writeFileSync(TARGET_FILE, newContent, 'utf-8');
-  console.log(`✓ 已更新 useBackgroundRotation.jsx`);
+  console.log('✓ 已更新 useBackgroundRotation.jsx');
   console.log(`  共找到 ${images.length} 张背景图:`);
   images.forEach(img => console.log(`    - ${img}`));
 }

@@ -6,7 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "update-backgrounds": "node public/background/update-backgrounds.js"
+    "update-backgrounds": "node scripts/update-backgrounds.js"
   },
   "keywords": [],
   "author": "",

@@ -8,14 +8,23 @@ const BACKGROUND_IMAGES = [
   '/background/Image_1715244884834.jpg',
   '/background/Image_1761029938994.jpg',
   '/background/Image_216600159819371.jpg',
-  '/background/PARK0202.jpg',
   '/background/PARK0204.jpg',
   '/background/background1.jpg',
   '/background/c4f97cb16d4125ac4f117e662159f2d6.jpg'
 ];
 
+// 惰性初始化函数，避免首次渲染闪烁
+function getRandomBackground() {
+  if (BACKGROUND_IMAGES.length === 0) {
+    return '';
+  }
+  const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
+  return BACKGROUND_IMAGES[randomIndex];
+}
+
 export function useBackgroundRotation() {
-  const [currentBackground, setCurrentBackground] = useState(BACKGROUND_IMAGES[0]);
+  // 使用惰性初始化，避免首次渲染固定图片再切换
+  const [currentBackground, setCurrentBackground] = useState(getRandomBackground);
 
   useEffect(() => {
     // 预加载所有背景图
@@ -23,10 +32,6 @@ export function useBackgroundRotation() {
       const img = new Image();
       img.src = src;
     });
-
-    // 随机选择一张背景图（单次访问固定）
-    const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
-    setCurrentBackground(BACKGROUND_IMAGES[randomIndex]);
   }, []);
 
   return currentBackground;
