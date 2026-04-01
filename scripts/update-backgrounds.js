@@ -75,9 +75,11 @@ function main() {
   const images = getBackgroundImages();
   
   if (images.length === 0) {
-    console.log('⚠ 未找到背景图文件');
-    console.log('  请将图片放入 public/background/ 目录');
-    console.log('  支持的格式：JPG, JPEG, PNG, WEBP, GIF, BMP');
+    if (process.exitCode !== 1) {
+      console.log('⚠ 未找到背景图文件');
+      console.log('  请将图片放入 public/background/ 目录');
+      console.log('  支持的格式：JPG, JPEG, PNG, WEBP, GIF, BMP');
+    }
     return;
   }
   

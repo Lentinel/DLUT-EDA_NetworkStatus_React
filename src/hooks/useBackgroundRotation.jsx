@@ -36,6 +36,8 @@ export function useBackgroundRotation() {
     // 仅预加载当前选中的背景图，避免一次性加载全部图片
     const img = new Image();
     img.src = currentBackground;
+    // 可选：添加加载完成回调用于调试
+    // img.onload = () => console.log('背景图加载完成:', currentBackground);
   }, [currentBackground]);
 
   return currentBackground;

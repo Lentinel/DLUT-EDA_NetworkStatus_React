@@ -14,7 +14,9 @@ function App() {
   // 将背景图设置在 body 元素上
   useEffect(() => {
     const previousBackgroundImage = document.body.style.backgroundImage;
-    document.body.style.backgroundImage = `url(${currentBackground})`;
+    if (currentBackground) {
+      document.body.style.backgroundImage = `url(${currentBackground})`;
+    }
     return () => {
       document.body.style.backgroundImage = previousBackgroundImage;
     };
