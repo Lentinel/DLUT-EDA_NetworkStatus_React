@@ -13,7 +13,7 @@ const BACKGROUND_IMAGES = [
   '/background/c4f97cb16d4125ac4f117e662159f2d6.jpg'
 ];
 
-// 惰性初始化函数，避免首次渲染闪烁
+// 随机选择一张背景图
 function getRandomBackground() {
   if (BACKGROUND_IMAGES.length === 0) {
     return '';

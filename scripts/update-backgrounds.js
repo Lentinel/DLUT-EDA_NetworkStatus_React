@@ -57,8 +57,9 @@ function updateHookFile(images) {
   );
 
   if (newContent === content) {
-    console.error('✗ 未能更新 useBackgroundRotation.jsx：文件格式可能已变更');
-    process.exitCode = 1;
+    console.log('✓ useBackgroundRotation.jsx 已是最新，无需更新');
+    console.log(`  共找到 ${images.length} 张背景图:`);
+    images.forEach(img => console.log(`    - ${img}`));
     return;
   }
 
