@@ -36,21 +36,28 @@ export function useBackgroundRotation() {
 
     let cancelled = false;
     const img = new Image();
-    img.src = src;
 
     const applyBackground = () => {
       if (cancelled) return;
       setCurrentBackground(src);
     };
 
+    // 先绑定事件，再设置 src，避免缓存图片错过 onload 事件
     if (img.decode) {
       img
         .decode()
         .then(applyBackground)
         .catch(applyBackground);
+      img.src = src;
     } else {
+      // 检查图片是否已缓存完成
       img.onload = applyBackground;
       img.onerror = applyBackground;
+      img.src = src;
+      // 如果图片已缓存，手动触发回调
+      if (img.complete) {
+        applyBackground();
+      }
     }
 
     return () => {

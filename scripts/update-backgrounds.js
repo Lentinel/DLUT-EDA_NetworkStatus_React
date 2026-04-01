@@ -42,7 +42,15 @@ function generateArrayContent(images) {
 
 // 更新 useBackgroundRotation.jsx 文件
 function updateHookFile(images) {
-  const content = readFileSync(TARGET_FILE, 'utf-8');
+  let content;
+  try {
+    content = readFileSync(TARGET_FILE, 'utf-8');
+  } catch (err) {
+    console.error('✗ 无法读取 useBackgroundRotation.jsx');
+    console.error(`  错误：${err.message}`);
+    process.exitCode = 1;
+    return;
+  }
   
   const regex = /const BACKGROUND_IMAGES = \[[\s\S]*?\];/;
   if (!regex.test(content)) {
@@ -63,7 +71,15 @@ function updateHookFile(images) {
     return;
   }
 
-  writeFileSync(TARGET_FILE, newContent, 'utf-8');
+  try {
+    writeFileSync(TARGET_FILE, newContent, 'utf-8');
+  } catch (err) {
+    console.error('✗ 无法写入 useBackgroundRotation.jsx');
+    console.error(`  错误：${err.message}`);
+    process.exitCode = 1;
+    return;
+  }
+
   console.log('✓ 已更新 useBackgroundRotation.jsx');
   console.log(`  共找到 ${images.length} 张背景图:`);
   images.forEach(img => console.log(`    - ${img}`));
