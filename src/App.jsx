@@ -4,15 +4,15 @@ import NetworkTable from './components/NetworkTable';
 import ActionButtons from './components/ActionButtons';
 import Footer from './components/Footer';
 import SakanaWidget from './components/SakanaWidget';
-import { useEffect } from 'react';
+import { useLayoutEffect } from 'react';
 import './App.css';
 
 function App() {
   const { data } = useNetworkStatus();
   const currentBackground = useBackgroundRotation();
 
-  // 将背景图设置在 body 元素上
-  useEffect(() => {
+  // 使用 useLayoutEffect 在 DOM 绘制前设置背景，避免首屏闪烁
+  useLayoutEffect(() => {
     const previousBackgroundImage = document.body.style.backgroundImage;
     if (currentBackground) {
       document.body.style.backgroundImage = `url(${currentBackground})`;

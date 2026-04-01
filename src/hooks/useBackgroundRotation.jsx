@@ -27,18 +27,36 @@ function getRandomBackground() {
  * 注意：名称中的 Rotation 指页面刷新时切换背景图，而非定时轮换
  */
 export function useBackgroundRotation() {
-  // 使用惰性初始化，避免首次渲染固定图片再切换
-  // 仅解构 state 值，setter 在当前需求下不需要使用
-  const [currentBackground] = useState(getRandomBackground);
+  // 初始为空字符串，待图片加载/解码完成后再应用背景，减少首屏闪烁
+  const [currentBackground, setCurrentBackground] = useState('');
 
   useEffect(() => {
-    if (!currentBackground) return;
-    // 仅预加载当前选中的背景图，避免一次性加载全部图片
+    const src = getRandomBackground();
+    if (!src) return;
+
+    let cancelled = false;
     const img = new Image();
-    img.src = currentBackground;
-    // 可选：添加加载完成回调用于调试
-    // img.onload = () => console.log('背景图加载完成:', currentBackground);
-  }, [currentBackground]);
+    img.src = src;
+
+    const applyBackground = () => {
+      if (cancelled) return;
+      setCurrentBackground(src);
+    };
+
+    if (img.decode) {
+      img
+        .decode()
+        .then(applyBackground)
+        .catch(applyBackground);
+    } else {
+      img.onload = applyBackground;
+      img.onerror = applyBackground;
+    }
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   return currentBackground;
 }
