@@ -10,6 +10,7 @@ const BACKGROUND_IMAGES = [
   '/background/Image_216600159819371.jpg',
   '/background/PARK0204.jpg',
   '/background/background1.jpg',
+  '/background/c31d4045e4a6e4f78fadef633fa74b.jpg',
   '/background/c4f97cb16d4125ac4f117e662159f2d6.jpg'
 ];
 
@@ -39,7 +40,10 @@ export function useBackgroundRotation() {
 
     const applyBackground = () => {
       if (cancelled) return;
-      setCurrentBackground(src);
+      // 仅在图片有效时应用背景
+      if (img.naturalWidth > 0) {
+        setCurrentBackground(src);
+      }
     };
 
     // 优先使用 decode 在设置 src 后解码图片；不支持时回退到 onload/onerror
@@ -47,15 +51,22 @@ export function useBackgroundRotation() {
       img.src = src;
       img
         .decode()
-        .then(applyBackground)
-        .catch(applyBackground);
+        .then(() => {
+          // 仅在解码成功后应用背景，避免使用解码失败的图片
+          applyBackground();
+        })
+        .catch(() => {
+          // 解码失败时保留当前背景，不应用出错的图片
+        });
     } else {
       // 检查图片是否已缓存完成
       img.onload = applyBackground;
-      img.onerror = applyBackground;
+      img.onerror = () => {
+        // 加载失败时保留当前背景，不应用出错的图片
+      };
       img.src = src;
-      // 如果图片已缓存，手动触发回调
-      if (img.complete) {
+      // 如果图片已缓存且有效，手动触发回调
+      if (img.complete && img.naturalWidth > 0) {
         applyBackground();
       }
     }
