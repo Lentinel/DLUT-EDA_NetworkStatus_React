@@ -22,17 +22,21 @@ function getRandomBackground() {
   return BACKGROUND_IMAGES[randomIndex];
 }
 
+/**
+ * 随机背景图 Hook
+ * 注意：名称中的 Rotation 指页面刷新时切换背景图，而非定时轮换
+ */
 export function useBackgroundRotation() {
   // 使用惰性初始化，避免首次渲染固定图片再切换
-  const [currentBackground, setCurrentBackground] = useState(getRandomBackground);
+  // 仅解构 state 值，setter 在当前需求下不需要使用
+  const [currentBackground] = useState(getRandomBackground);
 
   useEffect(() => {
-    // 预加载所有背景图
-    BACKGROUND_IMAGES.forEach((src) => {
-      const img = new Image();
-      img.src = src;
-    });
-  }, []);
+    if (!currentBackground) return;
+    // 仅预加载当前选中的背景图，避免一次性加载全部图片
+    const img = new Image();
+    img.src = currentBackground;
+  }, [currentBackground]);
 
   return currentBackground;
 }

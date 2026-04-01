@@ -16,7 +16,16 @@ const TARGET_FILE = join(__dirname, '../src/hooks/useBackgroundRotation.jsx');
 
 // 获取背景图目录中的所有图片文件
 function getBackgroundImages() {
-  const files = readdirSync(BACKGROUND_DIR);
+  let files;
+  try {
+    files = readdirSync(BACKGROUND_DIR);
+  } catch (err) {
+    console.error('✗ 无法读取背景图目录');
+    console.error(`  请确保目录存在：${BACKGROUND_DIR}`);
+    process.exitCode = 1;
+    return [];
+  }
+  
   return files
     .filter(file => {
       const ext = file.toLowerCase().slice(file.lastIndexOf('.'));

@@ -8,7 +8,7 @@ import { useEffect } from 'react';
 import './App.css';
 
 function App() {
-  const { data, loadData } = useNetworkStatus();
+  const { data } = useNetworkStatus();
   const currentBackground = useBackgroundRotation();
 
   // 将背景图设置在 body 元素上
