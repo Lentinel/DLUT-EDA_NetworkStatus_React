@@ -15,7 +15,7 @@ function App() {
   useLayoutEffect(() => {
     const previousBackgroundImage = document.body.style.backgroundImage;
     if (currentBackground) {
-      document.body.style.backgroundImage = `url(${currentBackground})`;
+      document.body.style.backgroundImage = `url("${currentBackground}")`;
     }
     return () => {
       document.body.style.backgroundImage = previousBackgroundImage;

@@ -1,26 +1,15 @@
 import { useState, useEffect } from 'react';
 
-// 背景图文件列表，你可以在此添加或删除图片
-const BACKGROUND_IMAGES = [
-  '/background/DJI_0911.jpg',
-  '/background/IMG_20250506_004910.jpg',
-  '/background/Image_1715244864182.jpg',
-  '/background/Image_1715244884834.jpg',
-  '/background/Image_1761029938994.jpg',
-  '/background/Image_216600159819371.jpg',
-  '/background/PARK0204.jpg',
-  '/background/background1.jpg',
-  '/background/c31d4045e4a6e4f78fadef633fa74b.jpg',
-  '/background/c4f97cb16d4125ac4f117e662159f2d6.jpg'
-];
+const BACKGROUND_INDEX_URL = '/background-images.json';
 
-// 随机选择一张背景图
-function getRandomBackground() {
-  if (BACKGROUND_IMAGES.length === 0) {
-    return '';
+// 将候选图打散，失败时可按顺序重试不同图片
+function shuffleImages(images) {
+  const list = [...images];
+  for (let i = list.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [list[i], list[j]] = [list[j], list[i]];
   }
-  const randomIndex = Math.floor(Math.random() * BACKGROUND_IMAGES.length);
-  return BACKGROUND_IMAGES[randomIndex];
+  return list;
 }
 
 /**
@@ -32,44 +21,79 @@ export function useBackgroundRotation() {
   const [currentBackground, setCurrentBackground] = useState('');
 
   useEffect(() => {
-    const src = getRandomBackground();
-    if (!src) return;
-
     let cancelled = false;
-    const img = new Image();
 
-    const applyBackground = () => {
-      if (cancelled) return;
-      // 仅在图片有效时应用背景
-      if (img.naturalWidth > 0) {
-        setCurrentBackground(src);
+    const loadAndApply = async () => {
+      let images = [];
+
+      try {
+        const response = await fetch(BACKGROUND_INDEX_URL, { cache: 'no-store' });
+        if (!response.ok) return;
+
+        const list = await response.json();
+        if (!Array.isArray(list)) return;
+
+        images = list.filter((item) => typeof item === 'string' && item.length > 0);
+      } catch {
+        return;
       }
+
+      if (cancelled || images.length === 0) return;
+
+      const candidates = shuffleImages(images);
+
+      const tryLoad = (index) => {
+        if (cancelled || index >= candidates.length) return;
+
+        const src = candidates[index];
+        const img = new Image();
+        let settled = false;
+
+        const cleanup = () => {
+          img.onload = null;
+          img.onerror = null;
+        };
+
+        const resolveAttempt = (success) => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+
+          if (cancelled) return;
+
+          if (success) {
+            setCurrentBackground(src);
+            return;
+          }
+
+          tryLoad(index + 1);
+        };
+
+        const applyIfValid = () => {
+          resolveAttempt(img.naturalWidth > 0);
+        };
+
+        img.onload = applyIfValid;
+        img.onerror = () => resolveAttempt(false);
+        img.src = src;
+
+        // decode 可提升首屏体验，但部分浏览器会出现 decode reject 且后续仍可 onload 的情况
+        if (typeof img.decode === 'function') {
+          img.decode().then(applyIfValid).catch(() => {
+            // decode reject 时优先回退到 onload/onerror；若资源已 complete 则立即判定
+            if (img.complete) {
+              applyIfValid();
+            }
+          });
+        } else if (img.complete) {
+          applyIfValid();
+        }
+      };
+
+      tryLoad(0);
     };
 
-    // 优先使用 decode 在设置 src 后解码图片；不支持时回退到 onload/onerror
-    if (img.decode) {
-      img.src = src;
-      img
-        .decode()
-        .then(() => {
-          // 仅在解码成功后应用背景，避免使用解码失败的图片
-          applyBackground();
-        })
-        .catch(() => {
-          // 解码失败时保留当前背景，不应用出错的图片
-        });
-    } else {
-      // 检查图片是否已缓存完成
-      img.onload = applyBackground;
-      img.onerror = () => {
-        // 加载失败时保留当前背景，不应用出错的图片
-      };
-      img.src = src;
-      // 如果图片已缓存且有效，手动触发回调
-      if (img.complete && img.naturalWidth > 0) {
-        applyBackground();
-      }
-    }
+    loadAndApply();
 
     return () => {
       cancelled = true;
