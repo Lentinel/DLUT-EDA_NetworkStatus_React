@@ -1,16 +1,26 @@
 import { useNetworkStatus } from './hooks/useNetworkStatus';
+import { useBackgroundRotation } from './hooks/useBackgroundRotation';
 import NetworkTable from './components/NetworkTable';
 import ActionButtons from './components/ActionButtons';
 import Footer from './components/Footer';
 import SakanaWidget from './components/SakanaWidget';
+import { useLayoutEffect } from 'react';
 import './App.css';
 
 function App() {
-  const { data, loadData } = useNetworkStatus();
+  const { data } = useNetworkStatus();
+  const currentBackground = useBackgroundRotation();
 
-  const handleRefresh = () => {
-    loadData();
-  };
+  // 使用 useLayoutEffect 在 DOM 绘制前设置背景，避免首屏闪烁
+  useLayoutEffect(() => {
+    const previousBackgroundImage = document.body.style.backgroundImage;
+    if (currentBackground) {
+      document.body.style.backgroundImage = `url("${currentBackground}")`;
+    }
+    return () => {
+      document.body.style.backgroundImage = previousBackgroundImage;
+    };
+  }, [currentBackground]);
 
   return (
     <>
